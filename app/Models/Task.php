@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Task extends Model
 {
@@ -21,7 +22,7 @@ class Task extends Model
     ];
 
     // Constante para não espalhar strings pelo código
-    const STATUSES = ['pending', 'in_progress', 'completed'];
+    const STATUSES = ['pending', 'completed'];
 
     // Scopes atualizados
     public function scopeByStatus($query, string $status)
@@ -29,14 +30,13 @@ class Task extends Model
         return $query->where('status', $status);
     }
 
+    public function scopeByPriority($query, string $priority)
+    {
+        return $query->where('priority', $priority);
+    }
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
-    }
-
-    public function scopeInProgress($query)
-    {
-        return $query->where('status', 'in_progress');
     }
 
     public function scopeCompleted($query)
