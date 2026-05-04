@@ -21,18 +21,30 @@
         <!-- Conteúdo -->
         <div v-else class="flex-1 overflow-y-auto">
             <div class="px-5 py-2 space-y-4">
+                
+                <div class="space-y-1">
+                    <label class="text-[0.7rem] font-semibold text-gray-600 uppercase tracking-wider">
+                        Título <span class="text-red-400" aria-hidden="true">*</span>
+                    </label>
+                    <input v-model="form.title" type="text"
+                        class="w-full text-sm text-[#7c7c7c] font-medium border border-[#e8e8e8]
+                            rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white"
+                        placeholder="Título"/>
+                </div>
 
-                <input v-model="form.title" type="text"
-                       class="w-full text-sm text-[#7c7c7c] font-medium border border-[#e8e8e8]
-                              rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white"
-                       placeholder="Título da tarefa"/>
+                 <!-- Descrição -->
+                <div class="space-y-1">
+                    <label for="create-description" class="text-[0.7rem] font-semibold text-gray-600 uppercase tracking-wider">Descrição (Opcional)</label>
+                    <textarea v-model="form.description" rows="4"
+                        class="w-full text-sm text-[#7c7c7c] font-medium border border-[#e8e8e8]
+                            rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669]
+                            resize-none bg-white"
+                        placeholder="Descrição">
+                    </textarea>
+                </div>
 
-                <textarea v-model="form.description" rows="4"
-                          class="w-full text-sm text-[#7c7c7c] font-medium border border-[#e8e8e8]
-                                 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669]
-                                 resize-none bg-white"
-                          placeholder="Descrição (opcional)"></textarea>
-
+                
+                <!-- Prioridade -->
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-[#444444]">Prioridade</span>
                     <select v-model="form.priority"
@@ -89,44 +101,45 @@
         <div class="flex-1 overflow-y-auto">
             <div class="px-5 py-2 space-y-4">
 
-                <input v-model="newForm.title" type="text"
-                       class="w-full text-sm text-[#7c7c7c] font-medium border border-[#e8e8e8]
-                              rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white"
-                       placeholder="Título da tarefa"/>
-                <p v-if="titleError" class="text-xs text-red-500">O título é obrigatório.</p>
+                <!-- Título -->
+                <div class="space-y-1">
+                    <label class="text-[0.7rem] font-semibold text-gray-600 uppercase tracking-wider">
+                        Título <span class="text-red-400">*</span>
+                    </label>
+                    <input v-model="newForm.title" type="text"
+                        class="w-full text-sm text-[#7c7c7c] font-normal border border-[#e8e8e8] rounded-lg px-3 py-2
+                                focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white"
+                        placeholder="Título"/>
+                    <p v-if="titleError" class="text-xs text-red-500">O título é obrigatório.</p>
+                </div>
 
-                <textarea v-model="newForm.description" rows="4"
-                          class="w-full text-sm text-[#7c7c7c] font-medium border border-[#e8e8e8]
-                                 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#059669]
-                                 resize-none bg-white"
-                          placeholder="Descrição (opcional)"></textarea>
+                <!-- Descrição -->
+                <div class="space-y-1">
+                    <label class="text-[0.7rem] font-semibold text-gray-600 uppercase tracking-wider">Descrição (Opcional)</label>
+                    <textarea v-model="newForm.description" rows="4"
+                            class="w-full text-sm text-[#7c7c7c] font-normal border border-[#e8e8e8] rounded-lg px-3 py-2
+                                    focus:outline-none focus:ring-2 focus:ring-[#059669] resize-none bg-white"
+                            placeholder="Descrição"></textarea>
+                </div>
 
+                <!-- Prioridade -->
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-[#444444]">Prioridade</span>
                     <select v-model="newForm.priority"
                             class="text-sm text-[#444444] border border-[#e8e8e8] rounded-lg px-3 py-1.5
-                                   focus:outline-none bg-white min-w-32">
+                                focus:outline-none bg-white min-w-32">
                         <option value="low">Baixa</option>
                         <option value="medium">Média</option>
                         <option value="high">Alta</option>
                     </select>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-[#444444]">Estado</span>
-                    <select v-model="newForm.status"
-                            class="text-sm text-[#444444] border border-[#e8e8e8] rounded-lg px-3 py-1.5
-                                   focus:outline-none bg-white min-w-32">
-                        <option value="pending">Pendente</option>
-                        <option value="completed">Concluída</option>
-                    </select>
-                </div>
-
+                <!-- Data -->
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-[#444444]">Data</span>
                     <input v-model="newForm.due_date" type="date"
-                           class="text-sm border border-[#e8e8e8] rounded-lg px-3 py-1.5
-                                  focus:outline-none bg-white min-w-32"/>
+                        class="text-sm border border-[#e8e8e8] rounded-lg px-3 py-1.5
+                                focus:outline-none bg-white min-w-32"/>
                 </div>
             </div>
         </div>
@@ -494,5 +507,18 @@ onMounted(() => {
     window.openTask     = openTask
     window.openCreate   = openCreate
     window.toggleStatus = toggleStatus
+
+    // Fecha painéis com tecla Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (confirmOpen.value) {
+                confirmOpen.value = false
+            } else if (editOpen.value) {
+                closeEdit()
+            } else if (createOpen.value) {
+                closeCreate()
+            }
+        }
+    })
 })
 </script>
