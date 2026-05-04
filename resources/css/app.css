@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Uniformiza a aparência de foco dos campos (create/edit/login/register) */
+@layer components {
+	input:focus,
+	textarea:focus,
+	select:focus,
+	.form-input:focus {
+		@apply outline-none ring-2 ring-blue-400 border-blue-400;
+	}
+	/* Se preferir cor diferente, altere `blue-400` para outra cor Tailwind */
+	/* Regra com maior especificidade para sobrescrever utilitários inline do Tailwind */
+	input:focus,
+	textarea:focus,
+	select:focus,
+	.form-input:focus {
+		outline: none !important;
+		box-shadow: 0 0 0 6px rgba(37, 157, 39, 0.12) !important;
+		border-color: #059669 !important; /* blue-400 */
+	}
+}
