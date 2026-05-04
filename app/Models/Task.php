@@ -49,4 +49,9 @@ class Task extends Model
     {
         return $this->status === 'completed';
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
