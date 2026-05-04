@@ -41,16 +41,6 @@
             </div>
 
             <div class="flex items-center justify-between">
-                <span class="text-sm text-[#444444]">Estado</span>
-                <select id="create-status"
-                        class="text-sm text-[#444444] border border-[#e8e8e8] rounded-lg px-3 py-1.5
-                               focus:outline-none bg-white min-w-32">
-                    <option value="pending" selected>Pendente</option>
-                    <option value="completed">Concluída</option>
-                </select>
-            </div>
-
-            <div class="flex items-center justify-between">
                 <span class="text-sm text-[#444444]">Data</span>
                 <input id="create-due-date" type="date"
                        class="text-sm border border-[#e8e8e8] rounded-lg px-3 py-1.5
