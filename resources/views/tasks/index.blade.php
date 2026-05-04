@@ -1,145 +1,129 @@
+{{-- resources/views/tasks/index.blade.php --}}
 @extends('layouts.app')
 @section('title', 'Todas as tarefas')
 
 @section('content')
 
-{{-- Header da página --}}
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <p class="text-sm text-gray-400 mt-0.5">
-            {{ $tasks->total() }} {{ $tasks->total() === 1 ? 'tarefa' : 'tarefas' }}
-        </p>
-    </div>
+{{-- Filtros --}}
+<div class="flex items-center gap-3 mb-6 ml-3 flex-wrap">
 
     {{-- Filtro de data --}}
     <form method="GET" action="{{ route('tasks.index') }}" class="flex items-center gap-2">
         @foreach(request()->except('due_date') as $key => $val)
             <input type="hidden" name="{{ $key }}" value="{{ $val }}">
         @endforeach
-        <input type="date" name="due_date" value="{{ request('due_date') }}"
-               onchange="this.form.submit()"
-               class="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+
+        <button type="button"
+                onclick="document.getElementById('date-filter-input').showPicker()"
+                class="flex items-center gap-2 bg-white border border-[#e8e8e8] rounded-lg
+                    px-3 py-2 cursor-pointer hover:border-gray-300 transition group">
+            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span class="text-xs text-gray-400">
+                {{ request('due_date')
+                    ? \Carbon\Carbon::parse(request('due_date'))->format('d/m/Y')
+                    : 'Filtrar por data' }}
+            </span>
+        </button>
+        <input type="date" id="date-filter-input" name="due_date"
+            value="{{ request('due_date') }}"
+            onchange="this.form.submit()"
+            class="sr-only">
+
         @if(request('due_date'))
             <a href="{{ route('tasks.index', request()->except('due_date')) }}"
-               class="text-xs text-gray-400 hover:text-gray-600">✕</a>
+               class="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600
+                      bg-white border border-[#e8e8e8] rounded-lg px-2.5 py-2 transition">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Limpar
+            </a>
         @endif
     </form>
+
+    {{-- Contador --}}
+    <span class="text-xs text-gray-400 ml-auto">
+        {{ $tasks->total() }} {{ $tasks->total() === 1 ? 'tarefa' : 'tarefas' }}
+    </span>
 </div>
 
-{{-- Lista --}}
-<div class="space-y-2">
-    @forelse($tasks as $task)
-        <div class="bg-white rounded-xl border border-gray-100 hover:border-gray-200
-                    hover:shadow-sm transition-all duration-150 group
-                    {{ $task->status === 'completed' ? 'opacity-60' : '' }}">
-            <div class="flex items-center gap-4 px-5 py-4">
+@php
+    $grouped = $tasks->getCollection()->groupBy('status');
+    $sections = [
+        'pending'   => ['label' => 'Pendentes',  'empty' => 'Sem tarefas pendentes.'],
+        'completed' => ['label' => 'Concluídas', 'empty' => 'Sem tarefas concluídas.'],
+    ];
 
-                {{-- Checkbox / Toggle --}}
-                <form method="POST" action="{{ route('tasks.updateStatus', $task) }}">
-                    @csrf @method('PATCH')
-                    <input type="hidden" name="status"
-                           value="{{ $task->status === 'completed' ? 'pending' : 'completed' }}">
-                    <button type="submit"
-                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center
-                                   shrink-0 transition-all duration-150
-                                   {{ $task->status === 'completed'
-                                        ? 'bg-blue-500 border-blue-500'
-                                        : 'border-gray-300 hover:border-blue-400' }}">
-                        @if($task->status === 'completed')
-                            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"
-                                 stroke="currentColor" stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        @endif
-                    </button>
-                </form>
+    if (request('status')) {
+        $sections = array_intersect_key($sections, [request('status') => true]);
+    }
+@endphp
 
-                {{-- Conteúdo clicável --}}
-                <a href="{{ route('tasks.show', $task) }}" class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <span class="font-medium text-gray-800 truncate
-                                     {{ $task->status === 'completed' ? 'line-through text-gray-400' : '' }}">
-                            {{ $task->title }}
-                        </span>
+@if($tasks->isEmpty())
+    <div class="text-center py-20">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+                         M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+        </div>
+        <p class="text-gray-400 font-medium">Nenhuma tarefa encontrada</p>
+        <button onclick="openCreate()"
+                class="inline-block mt-3 text-sm text-[#059669] hover:text-[#047d57] font-medium cursor-pointer">
+            Criar Tarefa
+        </button>
+    </div>
 
-                        {{-- Prioridade --}}
-                        @php
-                            $pColors = ['high'=>'bg-red-100 text-red-600','medium'=>'bg-yellow-100 text-yellow-600','low'=>'bg-green-100 text-green-600'];
-                            $pLabels = ['high'=>'Alta','medium'=>'Média','low'=>'Baixa'];
-                        @endphp
-                        <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $pColors[$task->priority] ?? '' }}">
-                            {{ $pLabels[$task->priority] ?? '' }}
-                        </span>
+@else
 
-                        {{-- Status --}}
-                        @php
-                            $sColors = ['pending'=>'bg-gray-100 text-gray-500','completed'=>'bg-blue-100 text-blue-600'];
-                            $sLabels = ['pending'=>'Pendente','completed'=>'Concluída'];
-                        @endphp
-                        <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $sColors[$task->status] ?? '' }}">
-                            {{ $sLabels[$task->status] ?? '' }}
-                        </span>
-                    </div>
+    @foreach($sections as $status => $meta)
+        @php $sectionTasks = $grouped->get($status, collect()); @endphp
 
-                    <div class="flex items-center gap-3 mt-1">
-                        @if($task->description)
-                            <p class="text-sm text-gray-400 truncate max-w-md">{{ $task->description }}</p>
-                        @endif
-                        @if($task->due_date)
-                            <span class="text-xs text-gray-400 shrink-0 flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                {{ $task->due_date->format('d/m/Y') }}
-                                @if($task->due_date->isPast() && $task->status !== 'completed')
-                                    <span class="text-red-400 font-medium">· atraso</span>
-                                @endif
-                            </span>
-                        @endif
-                    </div>
-                </a>
+        <div class="mb-8 ml-3 border border-[#f0f0f0] rounded-md p-4">
 
-                {{-- Ações --}}
-                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                    <a href="{{ route('tasks.edit', $task) }}"
-                       class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                    </a>
-                    <form method="POST" action="{{ route('tasks.destroy', $task) }}"
-                          onsubmit="return confirm('Eliminar esta tarefa?')">
-                        @csrf @method('DELETE')
-                        <button type="submit"
-                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                            </svg>
-                        </button>
-                    </form>
+            {{-- Cabeçalho --}}
+            <div class="flex items-center gap-3 mb-3">
+                <h2 class="text-base font-semibold text-gray-700">{{ $meta['label'] }}</h2>
+                <span class="text-xs text-gray-400">
+                    {{ $sectionTasks->count() }} {{ $sectionTasks->count() === 1 ? 'tarefa' : 'tarefas' }}
+                </span>
+            </div>
+
+            {{-- Botão adicionar (só em Pendentes) --}}
+            @if($status === 'pending')
+                <button onclick="openCreate()"
+                        class="w-full flex items-center border border-[#f3f3f3] rounded-md gap-3
+                               px-4 py-3 text-xs font-semibold text-[#7c7c7c] cursor-pointer">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Adicionar Nova Tarefa
+                </button>
+            @endif
+
+            {{-- Tarefas --}}
+            @forelse($sectionTasks as $task)
+                <div class="border-b border-[#f0f0f0] last:border-0">
+                    @include('tasks._upcoming-row', ['task' => $task])
                 </div>
-            </div>
+            @empty
+                <div class="section-empty px-5 py-4 text-xs text-gray-400 italic">
+                    {{ $meta['empty'] }}
+                </div>
+            @endforelse
         </div>
+    @endforeach
 
-    @empty
-        <div class="text-center py-20">
-            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
-            </div>
-            <p class="text-gray-400 font-medium">Nenhuma tarefa encontrada</p>
-            <a href="{{ route('tasks.create') }}"
-               class="inline-block mt-3 text-sm text-blue-500 hover:text-blue-700 font-medium">
-                + Criar primeira tarefa
-            </a>
-        </div>
-    @endforelse
-</div>
+    {{-- Paginação --}}
+    @if($tasks->hasPages())
+        <div class="mt-6 ml-3">{{ $tasks->withQueryString()->links() }}</div>
+    @endif
 
-{{-- Paginação --}}
-@if($tasks->hasPages())
-    <div class="mt-6">{{ $tasks->withQueryString()->links() }}</div>
 @endif
 
 @endsection
