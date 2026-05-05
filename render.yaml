@@ -1,9 +1,4 @@
-git add Dockerfile .dockerignore render.yaml \
-  database/factories/TaskFactory.php \
-  database/migrations/2026_05_05_000001_add_user_id_to_tasks_table.php \
-  config/app.php tests/Feature/TaskTest.php README.md
-
-git commit -m "chore(deploy): add Render Docker blueprint and related infra & test fixes" -m "Adiciona Dockerfile, render.yaml (Blueprint), migration para user_id em tasks, TaskFactory, e ajusta testes. Usa RENDER_EXTERNAL_URL para APP URL em produção e opta por SESSION_DRIVER=cookie para evitar migrações de sessão duplicadas. README atualizado com instruções de deploy no Render."services:
+services:
   - type: web
     name: taskly
     runtime: docker
