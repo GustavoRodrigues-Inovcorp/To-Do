@@ -5,7 +5,7 @@ services:
     plan: starter
     autoDeployTrigger: commit
     dockerfilePath: Dockerfile
-    preDeployCommand: php artisan migrate --force
+    preDeployCommand: php artisan config:clear && php artisan migrate --force --verbose
     envVars:
       - key: APP_NAME
         value: Taskly
