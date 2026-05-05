@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class TaskTest extends TestCase
@@ -20,11 +21,16 @@ class TaskTest extends TestCase
         $this->actingAs($this->user);
     }
 
+    private function taskFactory()
+    {
+        return Task::factory()->for($this->user);
+    }
+
     // ===== AUTENTICAÇÃO =====
 
     public function test_guest_cannot_access_tasks(): void
     {
-        auth()->logout();
+        Auth::logout();
 
         $this->get(route('tasks.index'))->assertRedirect(route('login'));
         $this->get(route('tasks.upcoming'))->assertRedirect(route('login'));
@@ -41,7 +47,7 @@ class TaskTest extends TestCase
 
     public function test_index_shows_all_tasks(): void
     {
-        Task::factory()->count(3)->create();
+        $this->taskFactory()->count(3)->create();
 
         $this->get(route('tasks.index'))
             ->assertOk()
@@ -50,8 +56,8 @@ class TaskTest extends TestCase
 
     public function test_index_filters_by_status(): void
     {
-        Task::factory()->create(['status' => 'pending']);
-        Task::factory()->create(['status' => 'completed']);
+        $this->taskFactory()->create(['status' => 'pending']);
+        $this->taskFactory()->create(['status' => 'completed']);
 
         $response = $this->get(route('tasks.index', ['status' => 'pending']));
 
@@ -62,8 +68,8 @@ class TaskTest extends TestCase
 
     public function test_index_filters_by_priority(): void
     {
-        Task::factory()->create(['priority' => 'high']);
-        Task::factory()->create(['priority' => 'low']);
+        $this->taskFactory()->create(['priority' => 'high']);
+        $this->taskFactory()->create(['priority' => 'low']);
 
         $response = $this->get(route('tasks.index', ['priority' => 'high']));
 
@@ -73,8 +79,8 @@ class TaskTest extends TestCase
 
     public function test_index_filters_by_due_date(): void
     {
-        Task::factory()->create(['due_date' => '2026-05-04']);
-        Task::factory()->create(['due_date' => '2026-06-01']);
+        $this->taskFactory()->create(['due_date' => '2026-05-04']);
+        $this->taskFactory()->create(['due_date' => '2026-06-01']);
 
         $response = $this->get(route('tasks.index', ['due_date' => '2026-05-04']));
 
@@ -93,7 +99,7 @@ class TaskTest extends TestCase
 
     public function test_upcoming_shows_today_tasks(): void
     {
-        Task::factory()->create(['due_date' => now()->toDateString()]);
+        $this->taskFactory()->create(['due_date' => now()->toDateString()]);
 
         $response = $this->get(route('tasks.upcoming'));
 
@@ -102,7 +108,7 @@ class TaskTest extends TestCase
 
     public function test_upcoming_shows_tomorrow_tasks(): void
     {
-        Task::factory()->create(['due_date' => now()->addDay()->toDateString()]);
+        $this->taskFactory()->create(['due_date' => now()->addDay()->toDateString()]);
 
         $response = $this->get(route('tasks.upcoming'));
 
@@ -168,7 +174,7 @@ class TaskTest extends TestCase
 
     public function test_can_update_task(): void
     {
-        $task = Task::factory()->create(['title' => 'Título original']);
+        $task = $this->taskFactory()->create(['title' => 'Título original']);
 
         $this->put(route('tasks.update', $task), [
             'title'    => 'Título atualizado',
@@ -181,7 +187,7 @@ class TaskTest extends TestCase
 
     public function test_cannot_update_task_without_title(): void
     {
-        $task = Task::factory()->create();
+        $task = $this->taskFactory()->create();
 
         $this->put(route('tasks.update', $task), [
             'priority' => 'medium',
@@ -191,7 +197,7 @@ class TaskTest extends TestCase
 
     public function test_can_update_task_via_json(): void
     {
-        $task = Task::factory()->create();
+        $task = $this->taskFactory()->create();
 
         $this->putJson(route('tasks.update', $task), [
             'title'    => 'Atualizado via JSON',
@@ -205,7 +211,7 @@ class TaskTest extends TestCase
 
     public function test_can_update_task_status(): void
     {
-        $task = Task::factory()->create(['status' => 'pending']);
+        $task = $this->taskFactory()->create(['status' => 'pending']);
 
         $this->patchJson(route('tasks.updateStatus', $task), [
             'status' => 'completed',
@@ -220,7 +226,7 @@ class TaskTest extends TestCase
 
     public function test_cannot_update_status_with_invalid_value(): void
     {
-        $task = Task::factory()->create();
+        $task = $this->taskFactory()->create();
 
         $this->patchJson(route('tasks.updateStatus', $task), [
             'status' => 'invalid_status',
@@ -231,7 +237,7 @@ class TaskTest extends TestCase
 
     public function test_can_fetch_task_as_json(): void
     {
-        $task = Task::factory()->create(['title' => 'Tarefa JSON']);
+        $task = $this->taskFactory()->create(['title' => 'Tarefa JSON']);
 
         $this->getJson(route('tasks.showJson', $task))
             ->assertOk()
@@ -242,7 +248,7 @@ class TaskTest extends TestCase
 
     public function test_can_delete_task(): void
     {
-        $task = Task::factory()->create();
+        $task = $this->taskFactory()->create();
 
         $this->delete(route('tasks.destroy', $task))
             ->assertRedirect(route('tasks.index'));
@@ -252,7 +258,7 @@ class TaskTest extends TestCase
 
     public function test_deleted_task_no_longer_appears_in_index(): void
     {
-        $task = Task::factory()->create(['title' => 'Tarefa a eliminar']);
+        $task = $this->taskFactory()->create(['title' => 'Tarefa a eliminar']);
 
         $this->delete(route('tasks.destroy', $task));
 

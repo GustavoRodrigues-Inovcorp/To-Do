@@ -8,7 +8,7 @@ Aplicação web para gestão de tarefas pessoais, desenvolvida com Laravel 12, T
  
 - **Backend:** Laravel 12 (PHP)
 - **Frontend:** Tailwind CSS, Vue 3 (Composition API)
-- **Base de dados:** MySQL
+- **Base de dados:** MySQL local / PostgreSQL no Render
 - **Autenticação:** Laravel Breeze
 - **Build:** Vite
 ---
@@ -80,6 +80,20 @@ php artisan serve
  
 Acede a [http://localhost:8000](http://localhost:8000), regista uma conta e começa a gerir as tuas tarefas.
  
+---
+
+## Deploy No Render
+
+Este projeto já inclui um `render.yaml` e um `Dockerfile` para deploy no Render.
+
+1. Faz push do projeto para GitHub.
+2. No Render, cria um novo Blueprint a partir deste repositório.
+3. O Render vai criar a aplicação web e a base de dados PostgreSQL automaticamente.
+4. As variáveis `APP_KEY`, `DB_URL` e restantes settings de produção são configuradas pelo Blueprint.
+5. A URL pública do Render é lida automaticamente via `RENDER_EXTERNAL_URL`, por isso não precisas de definir `APP_URL` manualmente.
+
+Se preferires configurar manualmente, usa uma Web Service do tipo Docker, liga um banco PostgreSQL e define `DB_CONNECTION=pgsql`, `SESSION_DRIVER=cookie`, `CACHE_STORE=database` e `QUEUE_CONNECTION=sync`.
+
 ---
  
 ## Estrutura do Projeto

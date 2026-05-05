@@ -1,0 +1,44 @@
+git add Dockerfile .dockerignore render.yaml \
+  database/factories/TaskFactory.php \
+  database/migrations/2026_05_05_000001_add_user_id_to_tasks_table.php \
+  config/app.php tests/Feature/TaskTest.php README.md
+
+git commit -m "chore(deploy): add Render Docker blueprint and related infra & test fixes" -m "Adiciona Dockerfile, render.yaml (Blueprint), migration para user_id em tasks, TaskFactory, e ajusta testes. Usa RENDER_EXTERNAL_URL para APP URL em produção e opta por SESSION_DRIVER=cookie para evitar migrações de sessão duplicadas. README atualizado com instruções de deploy no Render."services:
+  - type: web
+    name: taskly
+    runtime: docker
+    plan: starter
+    autoDeployTrigger: commit
+    dockerfilePath: Dockerfile
+    preDeployCommand: php artisan migrate --force
+    envVars:
+      - key: APP_NAME
+        value: Taskly
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: taskly-db
+          property: connectionString
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: SESSION_DRIVER
+        value: cookie
+      - key: SESSION_SECURE_COOKIE
+        value: true
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: info
+
+databases:
+  - name: taskly-db
+    plan: basic-256mb
