@@ -3,10 +3,13 @@ FROM composer:2 AS vendor
 WORKDIR /app
 
 COPY composer.json ./
-RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader --ignore-platform-reqs
+# Avoid running composer scripts before the application files (artisan) are copied
+RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader --ignore-platform-reqs --no-scripts
 
 COPY . ./
-RUN composer dump-autoload --optimize --no-interaction
+# Now that the application files (including artisan) are present, run dump-autoload and package discovery
+RUN composer dump-autoload --optimize --no-interaction \
+    && php artisan package:discover --ansi
 
 FROM node:20-bookworm-slim AS frontend
 
