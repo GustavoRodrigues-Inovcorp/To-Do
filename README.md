@@ -82,6 +82,48 @@ Acede a [http://localhost:8000](http://localhost:8000), regista uma conta e come
  
 ---
 
+## Servidor
+
+Esta secção documenta a parte do servidor — a API e as rotinas de backend associadas — e como a usar localmente e em produção.
+
+- **Resumo:** foi adicionada uma camada API REST para gerir `tasks` programaticamente, juntamente com migrações que relacionam tarefas a utilizadores, factories e testes automatizados.
+
+- **Endpoints principais (API REST):**
+    - `GET /api/tasks` — lista tarefas do utilizador autenticado
+    - `POST /api/tasks` — cria nova tarefa
+    - `GET /api/tasks/{id}` — mostra detalhe de uma tarefa
+    - `PUT /api/tasks/{id}` — atualiza uma tarefa
+    - `DELETE /api/tasks/{id}` — elimina uma tarefa
+    - `POST /api/auth/login` — autenticação (se aplicável)
+    - `POST /api/auth/register` — registo de utilizador (se aplicável)
+    - `GET /api/user` — dados do utilizador autenticado
+
+- **Migrações e dados:**
+    - Executa `php artisan migrate` para aplicar as migrações (inclui a migração que adiciona `user_id` a `tasks`).
+    - Para popular com dados de exemplo, executa `php artisan db:seed` ou usa as factories (`database/factories/TaskFactory.php`).
+
+- **Variáveis de ambiente importantes:**
+    - `APP_KEY`, `APP_ENV`, `APP_DEBUG`, `APP_URL`
+    - `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` (ou `DATABASE_URL`)
+    - `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` (se enviares emails)
+    - `CACHE_DRIVER`, `SESSION_DRIVER`, `QUEUE_CONNECTION` (ajusta conforme produção)
+
+- **Comandos úteis de desenvolvimento e operação:**
+    - `php artisan migrate --seed` — aplicar migrações e seeders
+    - `php artisan queue:work` — processar filas (se usares jobs)
+    - `php artisan test` — correr testes automatizados
+    - `npm run dev` / `npm run build` — assets front-end
+
+- **Autenticação e segurança:**
+    - A API está protegida por autenticação; usa cookies de sessão ou tokens (conforme configuração actual). Garante que `APP_URL` e cookies `SameSite` estão configurados para produção.
+
+- **Dicas de deploy:**
+    - Confirma que `APP_KEY` está definida em produção.
+    - Configura corretamente `DB_*` ou `DATABASE_URL` para apontar para a base de dados de produção.
+    - Se usares filas/cron, assegura que `php artisan queue:work` e `php artisan schedule:run` estão configurados no ambiente de produção.
+
+Se quiseres, adapto esta secção com detalhes mais específicos (ex.: exemplos de respostas JSON, política de autenticação usada — Sanctum/Passport/session — ou documentação OpenAPI).
+
 ## Deploy No Render
 
 Este projeto já inclui um `render.yaml` e um `Dockerfile` para deploy no Render.
