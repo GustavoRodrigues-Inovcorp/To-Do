@@ -38,6 +38,9 @@ COPY --from=frontend /app/public/build /var/www/html/public/build
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
+COPY docker-entrypoint.sh /var/www/html/
+RUN chmod +x /var/www/html/docker-entrypoint.sh
+
 EXPOSE 10000
 
-CMD sh -c 'php artisan serve --host 0.0.0.0 --port ${PORT:-10000}'
+ENTRYPOINT ["/var/www/html/docker-entrypoint.sh"]
